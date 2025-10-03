@@ -25,41 +25,33 @@ It provides tools for **financial literacy, crowdfunding, and microloan support*
 
 
 ## ⚙️ Installation & Setup
-**Clone the repository**
-   ```bash
-   git clone https://github.com/danielkthuo/pythonfinalproject.git ```
-  ---
-
-**## **Create a virtual environment****
- ```bash
-python -m venv venv
-
-# On Windows
- ```bash
-venv\Scripts\activate
-
-# On macOS/Linux
- ```bash
-source venv/bin/activate
-------
-
-**## **Install dependencies****
- ```bash
-pip install -r requirements.txt
----------------
-**Run the application**
-  ```bash
-flask run
------------------
- ```bash
-http://127.0.0.1:5000
-
-## 🚀 Setup Instructions
-
 ### 1️⃣ Clone the repository
-```bash
+bash
 git clone https://github.com/danielkthuo/pythonfinalproject.git
 cd pythonfinalproject
 
-2️⃣ Create a virtual environment
+**2️⃣ Create a virtual environment**
+bash
 python -m venv venv
+
+# On Windows
+ `bash
+venv\Scripts\activate
+
+# On macOS/Linux
+ `bash
+source venv/bin/activate
+------
+
+3️⃣ Install dependencies
+ `bash
+pip install -r requirements.txt
+---------------
+4️⃣ Run the application
+ `bash
+flask run
+-----------------
+ bash
+http://127.0.0.1:5000
+
+
