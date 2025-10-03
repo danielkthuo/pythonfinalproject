@@ -23,48 +23,28 @@ It provides tools for **financial literacy, crowdfunding, and microloan support*
 
 ---
 
-## 📂 Project Structure
-poverty_hub/
-│── app.py # Main Flask app
-│── models.py # Database models
-│── requirements.txt # Dependencies
-│── README.md # Project documentation
-│
-├── templates/ # HTML Templates
-│ ├── base.html # Layout template
-│ ├── home.html # Homepage
-│ ├── projects.html # List of SDG projects
-│ ├── donate.html # Donation page
-│ └── microloans.html # Microloan management
-│
-├── static/ # CSS, JS, Images
-│ ├── css/
-│ ├── js/
-│ └── img/
-
-
----
 
 ## ⚙️ Installation & Setup
 **Clone the repository**
    ```bash
-   git clone https://github.com/your-username/poverty-hub.git
-   cd poverty-hub
+   git clone https://github.com/danielkthuo/pythonfinalproject.git
+  ---
 
 **Create a virtual environment**
  ```bash
 python -m venv venv
 source venv/bin/activate   # On Linux/Mac
 venv\Scripts\activate      # On Windows
+------
 
 **Install dependencies**
  ```bash
 pip install -r requirements.txt
-
+---------------
 **Run the application**
  ```bash
 flask run
-
+-----------------
 http://127.0.0.1:5000
 
 
