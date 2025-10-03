@@ -31,21 +31,27 @@ It provides tools for **financial literacy, crowdfunding, and microloan support*
   ---
 
 ## **Create a virtual environment**
-```python -m venv venv
+ ```bash
+python -m venv venv
 
 # On Windows
-```venv\Scripts\activate
+ ```bash
+venv\Scripts\activate
 
 # On macOS/Linux
-```source venv/bin/activate
+ ```bash
+source venv/bin/activate
 ------
 
 ## **Install dependencies**
-```pip install -r requirements.txt
+ ```bash
+pip install -r requirements.txt
 ---------------
 **Run the application**
- ```flask run
+  ```bash
+flask run
 -----------------
-```http://127.0.0.1:5000
+ ```bash
+http://127.0.0.1:5000
 
 
