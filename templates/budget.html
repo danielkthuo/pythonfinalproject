@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-chart-pie me-2"></i>Budget Planner</h4>
+            </div>
+            <div class="card-body">
+                <form id="budgetForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="month" class="form-label">Month</label>
+                                <input type="month" class="form-control" id="month" name="month" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="income" class="form-label">Monthly Income ($)</label>
+                                <input type="number" class="form-control" id="income" name="income" step="0.01" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h5 class="mt-4">Expenses</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="housing" class="form-label">Housing</label>
+                                <input type="number" class="form-control" id="housing" name="housing" step="0.01" value="0">
+                            </div>
+                            <div class="mb-3">
+                                <label for="food" class="form-label">Food</label>
+                                <input type="number" class="form-control" id="food" name="food" step="0.01" value="0">
+                            </div>
+                            <div class="mb-3">
+                                <label for="transportation" class="form-label">Transportation</label>
+                                <input type="number" class="form-control" id="transportation" name="transportation" step="0.01" value="0">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="healthcare" class="form-label">Healthcare</label>
+                                <input type="number" class="form-control" id="healthcare" name="healthcare" step="0.01" value="0">
+                            </div>
+                            <div class="mb-3">
+                                <label for="education" class="form-label">Education</label>
+                                <input type="number" class="form-control" id="education" name="education" step="0.01" value="0">
+                            </div>
+                            <div class="mb-3">
+                                <label for="savings" class="form-label">Savings</label>
+                                <input type="number" class="form-control" id="savings" name="savings" step="0.01" value="0">
+                            </div>
+                            <div class="mb-3">
+                                <label for="other" class="form-label">Other Expenses</label>
+                                <input type="number" class="form-control" id="other" name="other" step="0.01" value="0">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Save Budget
+                    </button>
+                </form>
+                
+                <div id="budgetSummary" class="mt-4 p-3 bg-light rounded">
+                    <h5>Budget Summary</h5>
+                    <p>Enter your income and expenses to see your budget summary.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-history me-2"></i>Recent Budgets</h5>
+            </div>
+            <div class="card-body">
+                {% if budgets %}
+                    {% for budget in budgets %}
+                    <div class="border-bottom pb-2 mb-2">
+                        <strong>{{ budget.month }}</strong><br>
+                        Income: ${{ "%.2f"|format(budget.income) }}<br>
+                        Total Expenses: ${{ "%.2f"|format(budget.housing + budget.food + budget.transportation + budget.healthcare + budget.education + budget.other) }}<br>
+                        Savings: ${{ "%.2f"|format(budget.savings) }}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">No budgets created yet.</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-lightbulb me-2"></i>Budgeting Tips</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Track every expense</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Save at least 10% of income</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Limit housing to 30% of income</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Plan for irregular expenses</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const budgetForm = document.getElementById('budgetForm');
+    const budgetSummary = document.getElementById('budgetSummary');
+    
+    function calculateBudgetSummary() {
+        const income = parseFloat(document.getElementById('income').value) || 0;
+        const housing = parseFloat(document.getElementById('housing').value) || 0;
+        const food = parseFloat(document.getElementById('food').value) || 0;
+        const transportation = parseFloat(document.getElementById('transportation').value) || 0;
+        const healthcare = parseFloat(document.getElementById('healthcare').value) || 0;
+        const education = parseFloat(document.getElementById('education').value) || 0;
+        const savings = parseFloat(document.getElementById('savings').value) || 0;
+        const other = parseFloat(document.getElementById('other').value) || 0;
+        
+        const totalExpenses = housing + food + transportation + healthcare + education + other;
+        const remaining = income - totalExpenses - savings;
+        
+        let recommendations = '';
+        
+        if (housing > income * 0.3) {
+            recommendations += '<div class="alert alert-warning mt-2"><i class="fas fa-exclamation-triangle me-2"></i>Your housing costs are high. Try to keep them below 30% of your income.</div>';
+        }
+        
+        if (savings < income * 0.1) {
+            recommendations += '<div class="alert alert-info mt-2"><i class="fas fa-piggy-bank me-2"></i>Try to save at least 10% of your income for emergencies.</div>';
+        }
+        
+        if (remaining < 0) {
+            recommendations += '<div class="alert alert-danger mt-2"><i class="fas fa-exclamation-circle me-2"></i>You are spending more than you earn. Consider reducing expenses.</div>';
+        }
+        
+        budgetSummary.innerHTML = `
+            <h5>Budget Summary</h5>
+            <p><strong>Total Income:</strong> $${income.toFixed(2)}</p>
+            <p><strong>Total Expenses:</strong> $${totalExpenses.toFixed(2)}</p>
+            <p><strong>Planned Savings:</strong> $${savings.toFixed(2)}</p>
+            <p class="${remaining < 0 ? 'text-danger' : 'text-success'}">
+                <strong>Remaining:</strong> $${remaining.toFixed(2)}
+            </p>
+            ${recommendations}
+        `;
+    }
+    
+    // Calculate summary when any input changes
+    const inputs = document.querySelectorAll('input[type="number"]');
+    inputs.forEach(input => {
+        input.addEventListener('input', calculateBudgetSummary);
+    });
+    
+    budgetForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData);
+        
+        fetch('/api/budget', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert('Budget created successfully!');
+            window.location.reload();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error creating budget');
+        });
+    });
+    
+    // Initial calculation
+    calculateBudgetSummary();
+});
+</script>
+{% endblock %}

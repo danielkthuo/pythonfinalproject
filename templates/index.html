@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4>Poverty Alleviation Dashboard</h4>
+            </div>
+            <div class="card-body">
+                <p class="lead">Welcome to the comprehensive platform for fighting poverty through financial literacy, community support, and economic empowerment.</p>
+                
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <div class="card text-white bg-primary mb-3">
+                            <div class="card-body">
+                                <h5>Financial Education</h5>
+                                <p>Learn budgeting and money management skills</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-white bg-success mb-3">
+                            <div class="card-body">
+                                <h5>Community Support</h5>
+                                <p>Crowdfunding for those in need</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-white bg-warning mb-3">
+                            <div class="card-body">
+                                <h5>Economic Empowerment</h5>
+                                <p>Microloans for small businesses</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>Poverty Statistics</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Region</th>
+                                <th>Poverty Rate</th>
+                                <th>Median Income</th>
+                                <th>Unemployment</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for data in poverty_data %}
+                            <tr>
+                                <td>{{ data.region }}</td>
+                                <td>{{ data.poverty_rate }}%</td>
+                                <td>${{ "{:,.0f}".format(data.median_income) }}</td>
+                                <td>{{ data.unemployment_rate }}%</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        {% if current_user.is_authenticated %}
+        <div class="card">
+            <div class="card-header">
+                <h5>Your Recent Budgets</h5>
+            </div>
+            <div class="card-body">
+                {% if budgets %}
+                    {% for budget in budgets %}
+                    <div class="border-bottom pb-2 mb-2">
+                        <strong>{{ budget.month }}</strong><br>
+                        Income: ${{ "%.2f"|format(budget.income) }}<br>
+                        Savings: ${{ "%.2f"|format(budget.savings) }}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No budgets yet. <a href="{{ url_for('budget') }}">Create your first budget!</a></p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>Active Campaigns</h5>
+            </div>
+            <div class="card-body">
+                {% if campaigns %}
+                    {% for campaign in campaigns %}
+                    <div class="border-bottom pb-2 mb-2">
+                        <strong>{{ campaign.title }}</strong><br>
+                        Progress: {{ "%.0f"|format((campaign.current_amount/campaign.target_amount)*100) }}%<br>
+                        <small>{{ campaign.location }}</small>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No active campaigns.</p>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div class="card">
+            <div class="card-body text-center">
+                <h5>Join Our Community</h5>
+                <p>Create an account to access all features:</p>
+                <ul class="text-start">
+                    <li>Personal budgeting tools</li>
+                    <li>Microloan applications</li>
+                    <li>Community crowdfunding</li>
+                    <li>Financial education</li>
+                </ul>
+                <a href="{{ url_for('register') }}" class="btn btn-primary">Register Now</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
