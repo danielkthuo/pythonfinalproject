@@ -30,14 +30,14 @@ It provides tools for **financial literacy, crowdfunding, and microloan support*
    git clone https://github.com/danielkthuo/pythonfinalproject.git
   ---
 
-**Create a virtual environment**
+## **Create a virtual environment**
  ```bash
 python -m venv venv
 source venv/bin/activate   # On Linux/Mac
 venv\Scripts\activate      # On Windows
 ------
 
-**Install dependencies**
+## **Install dependencies**
  ```bash
 pip install -r requirements.txt
 ---------------
