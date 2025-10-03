@@ -54,4 +54,12 @@ flask run
  ```bash
 http://127.0.0.1:5000
 
+## 🚀 Setup Instructions
 
+### 1️⃣ Clone the repository
+```bash
+git clone https://github.com/danielkthuo/pythonfinalproject.git
+cd pythonfinalproject
+
+2️⃣ Create a virtual environment
+python -m venv venv
