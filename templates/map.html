@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-map-marked-alt me-2"></i>Kenya Poverty Map</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    This map shows poverty statistics across major Kenyan regions. Data is based on recent Kenya National Bureau of Statistics reports.
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6>National Poverty Rate</h6>
+                                <h4 class="text-danger">36.1%</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6>Extreme Poverty</h6>
+                                <h4 class="text-warning">8.9%</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6>Rural Poverty</h6>
+                                <h4 class="text-info">40.8%</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6>Urban Poverty</h6>
+                                <h4 class="text-success">29.4%</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="map" style="height: 600px; width: 100%;" class="mb-4 border rounded"></div>
+                
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>County/Region</th>
+                                <th>Poverty Rate</th>
+                                <th>Population</th>
+                                <th>Median Income (KES)</th>
+                                <th>Unemployment Rate</th>
+                                <th>Poverty Level</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for data in poverty_data %}
+                            <tr>
+                                <td><strong>{{ data.region }}</strong></td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar 
+                                            {% if data.poverty_rate < 30 %}bg-success
+                                            {% elif data.poverty_rate < 50 %}bg-warning
+                                            {% else %}bg-danger{% endif %}" 
+                                            style="width: {{ data.poverty_rate }}%">
+                                            {{ data.poverty_rate }}%
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ "{:,}".format(data.population) }}</td>
+                                <td>KES {{ "{:,.0f}".format(data.median_income) }}</td>
+                                <td>{{ data.unemployment_rate }}%</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if data.poverty_rate < 30 %}bg-success
+                                        {% elif data.poverty_rate < 50 %}bg-warning
+                                        {% else %}bg-danger{% endif %}">
+                                        {% if data.poverty_rate < 30 %}Low
+                                        {% elif data.poverty_rate < 50 %}Medium
+                                        {% else %}High{% endif %}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-bar me-2"></i>Key Poverty Indicators in Kenya</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Major Contributing Factors:</h6>
+                        <ul>
+                            <li>Limited access to quality education</li>
+                            <li>High unemployment, especially among youth</li>
+                            <li>Climate change affecting agriculture</li>
+                            <li>Regional economic disparities</li>
+                            <li>Limited access to financial services</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Government Initiatives:</h6>
+                        <ul>
+                            <li>Inua Jamii social protection program</li>
+                            <li>Affordable housing program</li>
+                            <li>Universal Health Coverage (UHC)</li>
+                            <li>Youth and women enterprise funds</li>
+                            <li>Agricultural subsidies and support</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<!-- Leaflet JavaScript -->
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize the map centered on Kenya
+    const map = L.map('map').setView([-0.0236, 37.9062], 6);
+    
+    // Add tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+    
+    // Color coding based on poverty rate
+    function getColor(povertyRate) {
+        return povertyRate > 50 ? '#d73027' :
+               povertyRate > 40 ? '#fc8d59' :
+               povertyRate > 30 ? '#fee08b' :
+               povertyRate > 20 ? '#d9ef8b' :
+                                  '#91cf60';
+    }
+    
+    // Add markers for each region with custom icons
+    {% for data in poverty_data %}
+    (function() {
+        const povertyRate = {{ data.poverty_rate }};
+        const customIcon = L.divIcon({
+            className: 'custom-div-icon',
+            html: `<div style="background-color: ${getColor(povertyRate)}; 
+                             width: 20px; 
+                             height: 20px; 
+                             border: 2px solid white;
+                             border-radius: 50%;
+                             text-align: center;
+                             line-height: 16px;
+                             color: white;
+                             font-weight: bold;
+                             font-size: 10px;">${povertyRate}%</div>`,
+            iconSize: [24, 24],
+            iconAnchor: [12, 12]
+        });
+        
+        const marker = L.marker([{{ data.lat }}, {{ data.lng }}], {icon: customIcon}).addTo(map);
+        
+        marker.bindPopup(`
+            <div style="min-width: 200px;">
+                <h6><strong>{{ data.region }} County</strong></h6>
+                <hr>
+                <table class="table table-sm">
+                    <tr>
+                        <td><strong>Poverty Rate:</strong></td>
+                        <td><span class="badge ${povertyRate > 50 ? 'bg-danger' : povertyRate > 40 ? 'bg-warning' : 'bg-success'}">${povertyRate}%</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Population:</strong></td>
+                        <td>{{ "{:,}".format(data.population) }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Median Income:</strong></td>
+                        <td>KES {{ "{:,.0f}".format(data.median_income) }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Unemployment:</strong></td>
+                        <td>{{ data.unemployment_rate }}%</td>
+                    </tr>
+                </table>
+                <div class="text-center">
+                    <small class="text-muted">Kenya National Bureau of Statistics</small>
+                </div>
+            </div>
+        `);
+        
+        // Add circle overlay for poverty intensity
+        L.circle([{{ data.lat }}, {{ data.lng }}], {
+            color: getColor(povertyRate),
+            fillColor: getColor(povertyRate),
+            fillOpacity: 0.2,
+            radius: {{ data.population / 100 }}  // Scale circle size by population
+        }).addTo(map);
+    })();
+    {% endfor %}
+    
+    // Add legend
+    const legend = L.control({position: 'bottomright'});
+    legend.onAdd = function(map) {
+        const div = L.DomUtil.create('div', 'info legend');
+        const grades = [0, 20, 30, 40, 50];
+        const labels = [];
+        
+        div.innerHTML = '<h6>Poverty Rate (%)</h6>';
+        
+        for (let i = 0; i < grades.length; i++) {
+            div.innerHTML +=
+                '<i style="background:' + getColor(grades[i] + 1) + '; width: 18px; height: 18px; float: left; margin-right: 8px; opacity: 0.7;"></i> ' +
+                grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '%<br>' : '+%');
+        }
+        
+        return div;
+    };
+    legend.addTo(map);
+});
+</script>
+
+<style>
+.custom-div-icon {
+    background: transparent;
+    border: none;
+}
+.info {
+    padding: 6px 8px;
+    font: 14px/16px Arial, Helvetica, sans-serif;
+    background: white;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+}
+.info h6 {
+    margin: 0 0 5px;
+    color: #777;
+}
+.legend {
+    line-height: 18px;
+    color: #555;
+}
+.legend i {
+    width: 18px;
+    height: 18px;
+    float: left;
+    margin-right: 8px;
+    opacity: 0.7;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-hand-holding-usd me-2"></i>Microloan Applications</h4>
+            </div>
+            <div class="card-body">
+                <form id="loanApplicationForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="loanAmount" class="form-label">Loan Amount ($)</label>
+                                <input type="number" class="form-control" id="loanAmount" name="amount" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="repaymentPeriod" class="form-label">Repayment Period (Months)</label>
+                                <select class="form-control" id="repaymentPeriod" name="repayment_period" required>
+                                    <option value="6">6 Months</option>
+                                    <option value="12">12 Months</option>
+                                    <option value="24">24 Months</option>
+                                    <option value="36">36 Months</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="purpose" class="form-label">Loan Purpose</label>
+                        <textarea class="form-control" id="purpose" name="purpose" rows="3" required 
+                                  placeholder="Describe what you need the loan for..."></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="businessPlan" class="form-label">Business Plan (Optional)</label>
+                        <textarea class="form-control" id="businessPlan" name="business_plan" rows="4"
+                                  placeholder="Describe your business plan, how you'll use the funds, and how you plan to repay..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane me-2"></i>Submit Application
+                    </button>
+                </form>
+                
+                <div class="mt-4">
+                    <h5>Loan Terms</h5>
+                    <ul>
+                        <li>Interest Rate: 5% annually</li>
+                        <li>Maximum Loan Amount: $10,000</li>
+                        <li>No collateral required for loans under $2,000</li>
+                        <li>Flexible repayment terms</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        {% if applications %}
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>Your Loan Applications</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Purpose</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for app in applications %}
+                            <tr>
+                                <td>{{ app.created_at.strftime('%Y-%m-%d') }}</td>
+                                <td>${{ "%.2f"|format(app.amount) }}</td>
+                                <td>{{ app.purpose[:50] }}{% if app.purpose|length > 50 %}...{% endif %}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if app.status == 'approved' %}bg-success
+                                        {% elif app.status == 'rejected' %}bg-danger
+                                        {% else %}bg-warning{% endif %}">
+                                        {{ app.status|title }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>How Microloans Help</h5>
+            </div>
+            <div class="card-body">
+                <ul>
+                    <li>Start or expand small businesses</li>
+                    <li>Create employment opportunities</li>
+                    <li>Build financial independence</li>
+                    <li>Support local economic growth</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>Eligibility Criteria</h5>
+            </div>
+            <div class="card-body">
+                <ul>
+                    <li>Must be 18 years or older</li>
+                    <li>Have a viable business idea</li>
+                    <li>Willing to attend financial literacy training</li>
+                    <li>No minimum credit score required</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('loanApplicationForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData);
+    data.amount = parseFloat(data.amount);
+    data.repayment_period = parseInt(data.repayment_period);
+    
+    fetch('/api/loan-application', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert('Loan application submitted successfully!');
+        window.location.reload();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error submitting application');
+    });
+});
+</script>
+{% endblock %}

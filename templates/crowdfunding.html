@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4><i class="fas fa-hand-holding-heart me-2"></i>Crowdfunding Campaigns</h4>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createCampaignModal">
+                    <i class="fas fa-plus me-2"></i>Create Campaign
+                </button>
+            </div>
+            <div class="card-body">
+                {% if campaigns %}
+                    <div class="row">
+                        {% for campaign in campaigns %}
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ campaign.title }}</h5>
+                                    <p class="card-text">{{ campaign.description[:150] }}...</p>
+                                    <p><strong>Location:</strong> {{ campaign.location }}</p>
+                                    <p><strong>Category:</strong> {{ campaign.category }}</p>
+                                    
+                                    <div class="progress mb-3">
+                                        <div class="progress-bar" role="progressbar" 
+                                             style="width: {{ (campaign.current_amount/campaign.target_amount)*100 }}%">
+                                            {{ "%.0f"|format((campaign.current_amount/campaign.target_amount)*100) }}%
+                                        </div>
+                                    </div>
+                                    
+                                    <p><strong>Raised:</strong> ${{ "%.2f"|format(campaign.current_amount) }} / ${{ "%.2f"|format(campaign.target_amount) }}</p>
+                                    
+                                    {% if current_user.is_authenticated %}
+                                    <button class="btn btn-success btn-sm" onclick="showDonateModal({{ campaign.id }}, '{{ campaign.title }}')">
+                                        Donate
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-center text-muted">No active campaigns found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>How Crowdfunding Helps</h5>
+            </div>
+            <div class="card-body">
+                <ul>
+                    <li>Support local entrepreneurs</li>
+                    <li>Fund education initiatives</li>
+                    <li>Provide emergency relief</li>
+                    <li>Build community projects</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Campaign Modal -->
+<div class="modal fade" id="createCampaignModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create New Campaign</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('create_campaign') }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Campaign Title</label>
+                        <input type="text" class="form-control" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="description" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Target Amount ($)</label>
+                        <input type="number" class="form-control" name="target_amount" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Organizer Name</label>
+                        <input type="text" class="form-control" name="organizer_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Location</label>
+                        <input type="text" class="form-control" name="location" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Category</label>
+                        <select class="form-control" name="category" required>
+                            <option value="education">Education</option>
+                            <option value="business">Small Business</option>
+                            <option value="emergency">Emergency Relief</option>
+                            <option value="community">Community Project</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Campaign</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Donate Modal -->
+<div class="modal fade" id="donateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Donate to <span id="campaignTitle"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="donateForm">
+                <div class="modal-body">
+                    <input type="hidden" id="campaignId" name="campaign_id">
+                    <div class="mb-3">
+                        <label class="form-label">Donation Amount ($)</label>
+                        <input type="number" class="form-control" id="donationAmount" name="amount" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Message (Optional)</label>
+                        <textarea class="form-control" name="message" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" name="anonymous" id="anonymousDonation">
+                        <label class="form-check-label" for="anonymousDonation">Donate anonymously</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Donate</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showDonateModal(campaignId, campaignTitle) {
+    document.getElementById('campaignTitle').textContent = campaignTitle;
+    document.getElementById('campaignId').value = campaignId;
+    new bootstrap.Modal(document.getElementById('donateModal')).show();
+}
+
+document.getElementById('donateForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData);
+    data.amount = parseFloat(data.amount);
+    data.campaign_id = parseInt(data.campaign_id);
+    data.anonymous = document.getElementById('anonymousDonation').checked;
+    
+    fetch('/api/donate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert('Thank you for your donation!');
+        bootstrap.Modal.getInstance(document.getElementById('donateModal')).hide();
+        window.location.reload();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error processing donation');
+    });
+});
+</script>
+{% endblock %}
