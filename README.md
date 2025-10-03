@@ -27,7 +27,7 @@ It provides tools for **financial literacy, crowdfunding, and microloan support*
 ## ⚙️ Installation & Setup
 **Clone the repository**
    ```bash
-   git clone https://github.com/danielkthuo/pythonfinalproject.git
+   git clone https://github.com/danielkthuo/pythonfinalproject.git ```
   ---
 
 ## **Create a virtual environment**
